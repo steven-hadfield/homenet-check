@@ -16,13 +16,30 @@ Ideas of how the project could evolve in the future (likely through integration 
 
 ## Reqirements:
 - Python 3.4+
-- pip (`python -m ensurepip`)
-- SQLite 3 for initial DB editing (until functionality is built for managing db)
+- pip (`python3 -m ensurepip`)
 
-## Setup
-(Proposed)
+## Getting started
 1. Clone repository
-2. `pip install -r requiements.txt`
-3. Initialize inventory database (default `inv.db` in project directory) by running `homenet-check.py initialize-db [--db path/to/file]`
-3. Populate sqlite3 database `inv.db` with current inventory
-4. Run `homenet-check.py query` 
+1. `pip3 install -r requiements.txt`
+1. Optional: Build configuration file to use a different database or logging configuration (see [Config]).
+1. Initialize inventory database schema (default `inv.db` in project directory) by running `homenet-check.py initialize-db`
+1. Populate devices using `homenet-check.py add-device`
+1. Run `homenet-check.py query`
+
+## Config
+Default configuration that can be overridden via a JSON file and specified with the `-c/--config` parameter.
+ 
+The default implementation uses SQLite, but any database dialects supported by [SQLAlchemy](https://docs.sqlalchemy.org/en/13/dialects/index.html)
+should work with the corresponding driver installed and corresponding `dsn` specified.
+
+### Example
+Default configuration
+```
+{
+    "dsn": "sqlite:///inv.db",
+    "log": {
+        "level": "warning",
+        "file": null
+    }
+}
+```
