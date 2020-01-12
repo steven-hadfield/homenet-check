@@ -14,12 +14,12 @@ Base = declarative_base()
 
 class Device(Base):
     __tablename__ = 'devices'
-
-    id = Column(Integer, primary_key=True)
-    model = Column(String, nullable=False)
-    vendor_id = Column(String, nullable=False)
-    version = Column(String)
-    description = Column(String)
+    id = Column(Integer, primary_key=True, comment='Generated device ID')
+    model = Column(String(100), nullable=False, comment='Model ID used for lookup with vendor')
+    vendor_id = Column(String(30), nullable=False, comment='Vendor ID corresponding with the vendor module for lookup within homenet')
+    version = Column(String(80), comment='Device current known version')
+    description = Column(String(255), comment='Meaningful description (like "Home router")')
+    address = Column(String(255), comment='Network address for management console (e.g. IP or Web Address)')
 
     def get_vendor(self, config):
         vendor = registry.get(self.vendor_id)

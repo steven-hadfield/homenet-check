@@ -13,6 +13,7 @@ Ideas of how the project could evolve in the future (likely through integration 
 - Best practices library to help educate (index of links to other sites)
 - Run as a webservice or cron
 - Make default runtime easy enough for a less-technical user to configure and run
+- Scrape/login to devices to retrieve current version (for devices that could easily support it)
 
 ## Reqirements:
 - Python 3.4+

@@ -31,6 +31,10 @@ class Vendor(metaclass=abc.ABCMeta):
         """Return a list of enumerated devices, if suppported. If enumeration is not supported, should return None"""
         return None
 
+    def retrieve_device_version(self, device):
+        """Use the device information to retrieve the current version. If not supported, should return None"""
+        return None
+
 
 class VendorRegistry(object):
     def __init__(self):
