@@ -3,6 +3,8 @@ import json
 import logging
 import os.path
 
+from tempfile import gettempdir
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -21,10 +23,13 @@ class Config:
     dsn = 'sqlite:///inv.db'
     log_level = logging.INFO
     log_file = None
+    cache_dir = None
 
     def __init__(self, config_fp):
         if config_fp:
             self.load(config_fp)
+        if self.cache_dir is None:
+            self.cache_dir = gettempdir()
 
     def load(self, fp):
         config = json.load(fp)
@@ -35,6 +40,9 @@ class Config:
                 self.log_level = config['log']['level'].upper()
             if 'file' in config['log']:
                 self.log_file = config['log']['file']
+        if 'cache' in config:
+            self.cache_dir = config['cache']
+
 
 class RegisterCommand:
     def __init__(self, command, description, args = []):
@@ -70,15 +78,17 @@ class HomeNetChecker():
 
     @RegisterCommand('query', 'Check for available device updates')
     def query(self, args):
-        for instance in self.session.query(Device).order_by(Device.id):
-            logger.info(instance.name, instance.vendor)
+        for device in self.session.query(Device).order_by(Device.id):
+            logger.info('Checking for updates for %s %s', device.vendor_id, device.model)
+            if device.has_update(self.config):
+                print(device.vendor_id, device.model)
 
     @RegisterCommand('vendor-list', 'Print list of supported vendors')
     def vendor_list(self, args):
         #width = max([len(vendor_id) for vendor_id in registry.keys()])
         print('%s\t%s' % ('Vendor ID', 'Name'))
         for vendor_id, vendor_class in registry.items():
-            vendor = vendor_class()
+            vendor = vendor_class(self.config)
             print('%s\t%s' % (vendor_id, vendor.name()))
 
     @RegisterCommand('add-device', 'Add a device to be checked', [

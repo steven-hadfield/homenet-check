@@ -32,10 +32,17 @@ Default configuration that can be overridden via a JSON file and specified with 
 The default implementation uses SQLite, but any database dialects supported by [SQLAlchemy](https://docs.sqlalchemy.org/en/13/dialects/index.html)
 should work with the corresponding driver installed and corresponding `dsn` specified.
 
+Structure:
+- `cache`: Cache directory for any vendor data files that may need to be downloaded. Defaults to system temp.
+- `dsn`: Database connection string (Data Source Name). See [SQLAlchemy.create_engine](https://docs.sqlalchemy.org/en/13/core/engines.html#sqlalchemy.create_engine) for details
+- `log.level`: Supported [log levels](https://docs.python.org/3/library/logging.html?highlight=logging#logging-levels) (normalized to upper case)
+- `log.file`: Option to redirect log output to a file rather than stdout (useful for scheduled runs)
+
 ### Example
-Default configuration
+Default configuration:
 ```
 {
+    "cache": null,
     "dsn": "sqlite:///inv.db",
     "log": {
         "level": "warning",

@@ -1,1 +1,3 @@
 sqlalchemy>=1.3
+cmp_version>=3
+requests>=2.21

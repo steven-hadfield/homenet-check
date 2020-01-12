@@ -11,6 +11,9 @@ __all__ = ['registry', 'Vendor', 'VendorRegistry']
 
 class Vendor(metaclass=abc.ABCMeta):
 
+    def __init__(self, config):
+        pass
+
     @staticmethod
     @abc.abstractproperty
     def id():
