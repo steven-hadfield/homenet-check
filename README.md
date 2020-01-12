@@ -21,7 +21,7 @@ Ideas of how the project could evolve in the future (likely through integration 
 
 ## Getting started
 1. Clone repository
-1. `pip3 install -r requiements.txt`
+1. `pip3 install -r --user requirements.txt` (or use virtualenv if you prefer)
 1. Optional: Build configuration file to use a different database or logging configuration (see [Config]).
 1. Initialize inventory database schema (default `inv.db` in project directory) by running `homenet-check.py initialize-db`
 1. Populate devices using `homenet-check.py add-device`
@@ -46,8 +46,12 @@ Default configuration:
     "cache": null,
     "dsn": "sqlite:///inv.db",
     "log": {
-        "level": "warning",
+        "level": "info",
         "file": null
     }
 }
 ```
+
+### Upgrades
+The database is versioned using [Alembic](https://alembic.sqlalchemy.org/en/latest/).
+Running `initialize-db` after an update should handle performing any schema updates required.

@@ -16,7 +16,7 @@ __all__ = ['Config', "HomeNetChecker', 'RegisterCommand"]
 parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers(title='subcommands', help='Operations to be performed')
 
-logger = logging.getLogger()
+logger = logging.getLogger('homenet')
 registry.load_vendors()
 
 class Config:
@@ -72,9 +72,22 @@ class HomeNetChecker():
 
     @RegisterCommand('initialize-db', 'Create database table structure')
     def init_db(self, args):
+        from alembic.config import Config
+        from alembic import command
+        alembic_cfg = Config('alembic.ini')
+        alembic_cfg.set_main_option("sqlalchemy.url", self.config.dsn)
         engine = self.session.get_bind()
-        Base.metadata.create_all(engine)
-        logger.info('Tables created')
+        if not engine.dialect.has_table(engine, 'devices'):
+            Base.metadata.create_all(engine)
+            logger.info('Tables created')
+
+            command.stamp(alembic_cfg, "head")
+            # TODO: Fix alembic overriding root log
+            logger.debug('Alembic history recorded')
+        else:
+            logger.info('Checking for database changes')
+            command.upgrade(alembic_cfg, "head")
+            logger.debug('Alembic upgrade completed (if any)')
 
     @RegisterCommand('query', 'Check for available device updates')
     def query(self, args):

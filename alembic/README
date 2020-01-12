@@ -1,0 +1,5 @@
+Generic single-database configuration.
+
+When run from within homenet-check, the configuration should be inherited.
+If running alembic directly, you may need to modify the [alembic.ini](../alembic.ini) file
+if you are not using the standard database configuration or ensure that your homenet configuration is located at (project-dir)/config.json
