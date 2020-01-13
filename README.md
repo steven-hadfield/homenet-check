@@ -9,7 +9,8 @@ The vision for this project is pretty flexible, but the goal is to help ensure y
 The list of vendors will grow in time as more people are able to contribute.
 
 The current list of implemented vendor checks
-| Vendor | ID | List Products | Check for Update |
+
+| Vendor | ID | List Devices | Check for Update |
 | -- | -- | -- | -- |
 | Netgear | `netgear` | :white_check_mark: | :heavy_check_mark: |
 | OpenWRT | `openwrt` | :heavy_check_mark: | :heavy_check_mark: |
