@@ -59,11 +59,16 @@ class RegisterCommand:
 
         return method
 
+def non_empty_argument(arg):
+    if arg is not None and arg.strip() == '':
+        raise argparse.ArgumentTypeError('Value cannot be an empty string')
+    return arg
+
 class HomeNetChecker():
     def __init__(self, config):
         self.config = config
         self.session = self._get_db()
-        logger.debug('Loaded vendors: %d', len(registry.items()))
+        logger.debug('Loaded vendors: %d', len(registry.keys()))
 
     def _get_db(self):
         engine = create_engine(self.config.dsn)
@@ -91,10 +96,16 @@ class HomeNetChecker():
 
     @RegisterCommand('query', 'Check for available device updates')
     def query(self, args):
-        for device in self.session.query(Device).order_by(Device.id):
-            logger.info('Checking for updates for %s %s', device.vendor_id, device.model)
-            if device.has_update(self.config):
-                print(device.vendor_id, device.model)
+        # TODO: Determine notification scheme
+        devices = self.session.query(Device).order_by(Device.id)
+        if devices:
+            for device in devices:
+                logger.info('Checking for updates for %s %s', device.vendor_id, device.model)
+                if device.has_update():
+                    print(device.vendor_id, device.model)
+        else:
+            logger.info('No devices configured')
+
 
     @RegisterCommand('vendor-list', 'Print list of supported vendors')
     def vendor_list(self, args):
@@ -123,6 +134,7 @@ def homenet():
         help='Path to configuration file')
     args = parser.parse_args()
     config = Config(args.config)
+    registry.init_config(config)
     log_config = {'level': config.log_level}
     if config.log_file:
         log_config['filename'] = config.log_file,

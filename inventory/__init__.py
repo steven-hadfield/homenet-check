@@ -21,20 +21,20 @@ class Device(Base):
     description = Column(String(255), comment='Meaningful description (like "Home router")')
     address = Column(String(255), comment='Network address for management console (e.g. IP or Web Address)')
 
-    def get_vendor(self, config):
+    def get_vendor(self):
         vendor = registry.get(self.vendor_id)
         if vendor is None:
             raise ValueError("Vendor not found")
-        return vendor(config)
+        return vendor
 
-    def get_available_update(self, config):
-        vendor = self.get_vendor(config)
+    def get_available_update(self):
+        vendor = self.get_vendor()
         version = vendor.get_latest(self)
         logger.info('Latest version for %s %s is %s, current: %s', vendor.name(), self.model, version, self.version)
         if self.version is None or cmp_version(version, self.version) > 0:
             return version
 
-    def has_update(self, config):
-        newer = self.get_available_update(config)
+    def has_update(self):
+        newer = self.get_available_update()
         return newer is not None
 

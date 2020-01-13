@@ -2,8 +2,7 @@
 """
 
 import abc
-from os.path import dirname#, basename, isfile, join
-#import glob
+from os.path import dirname
 import pkgutil
 import sys
 
@@ -37,11 +36,20 @@ class Vendor(metaclass=abc.ABCMeta):
 
 
 class VendorRegistry(object):
+    config = None
     def __init__(self):
+        self.vendor_classes = {}
+        self.vendor = None
+
+    def init_config(self, config):
         self.vendors = {}
+        for vendor_id, klass in self.vendor_classes.items():
+            self.vendors[vendor_id] = klass(config)
 
     def register(self, klass):
-        self.vendors[klass.id()] = klass
+        self.vendor_classes[klass.id()] = klass
+        if self.config:
+            self.vendors[klass.id()] = klass(self.config)
         return klass
 
     def unregister(self, name):
@@ -52,7 +60,7 @@ class VendorRegistry(object):
         return self.vendors[name] if name in self.vendors else None
 
     def keys(self):
-        return self.vendors.keys()
+        return self.vendor_classes.keys()
 
     def values(self):
         return self.vendors.values()
