@@ -12,6 +12,8 @@ logger = logging.getLogger('inventory')
 
 Base = declarative_base()
 
+Base.as_dict = lambda r: {c.name: getattr(r, c.name) for c in r.__table__.columns}
+
 class Device(Base):
     __tablename__ = 'devices'
     id = Column(Integer, primary_key=True, comment='Generated device ID')

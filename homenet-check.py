@@ -7,6 +7,7 @@ from tempfile import gettempdir
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from tabulate import tabulate
 
 from vendor import registry
 from inventory import Base, Device
@@ -18,6 +19,10 @@ subparsers = parser.add_subparsers(title='subcommands', help='Operations to be p
 
 logger = logging.getLogger('homenet')
 registry.load_vendors()
+
+# TODO: Move classes to separate file?
+# TODO: Split commands?
+# TODO: Add tests
 
 class Config:
     dsn = 'sqlite:///inv.db'
@@ -107,26 +112,67 @@ class HomeNetChecker():
             logger.info('No devices configured')
 
 
-    @RegisterCommand('vendor-list', 'Print list of supported vendors')
+    @RegisterCommand('list-vendor', 'Print list of supported vendors')
     def vendor_list(self, args):
-        #width = max([len(vendor_id) for vendor_id in registry.keys()])
-        print('%s\t%s' % ('Vendor ID', 'Name'))
-        for vendor_id, vendor_class in registry.items():
-            vendor = vendor_class(self.config)
-            print('%s\t%s' % (vendor_id, vendor.name()))
+        vendors = [{'ID': vendor.__class__.id(), 'Name': vendor.name()} for vendor in registry.values()]
+        print(tabulate(vendors, headers='keys'))
+
+    @RegisterCommand('list-devices', 'Provide list of recorded device information')
+    def device_list(self, args):
+        devices = self.session.query(Device).order_by(Device.id)
+        if devices:
+            device_list = [device.as_dict() for device in devices]
+            print(tabulate(device_list, headers='keys'))
+        else:
+            logger.info('No devices configured')
 
     @RegisterCommand('add-device', 'Add a device to be checked', [
         {'name': '--vendor-id', 'choices': registry.keys(), 'help': 'Vendor ID', 'required': True},
-        {'name': '--model', 'help': 'Model ID', 'required': True},
+        {'name': '--model', 'type': non_empty_argument, 'help': 'Model ID', 'required': True},
         {'name': '--version', 'help': 'Device version'},
+        {'name': '--address', 'help': 'IP or web address for the device'},
         {'name': '--description', 'help': 'Description'}])
-    def add_item(self, args):
-        keys = [c.name for c in Device.__mapper__.columns if c.name != 'id']
+    def device_add(self, args):
+        keys = [c.name for c in Device.__table__.columns if c.name != 'id']
         values = vars(args)
-        device = Device(**{k: values[k] for k in keys})
+        device = Device(**{k: values[k] for k in keys if k in values})
         self.session.add(device)
         self.session.commit()
         logger.info('Device added with id %d', device.id)
+
+    @RegisterCommand('update-device', 'Update information for an existing device', [
+        {'name': '--id', 'help': 'Device ID', 'type': int, 'required': True},
+        {'name': '--vendor-id', 'choices': registry.keys(), 'help': 'Vendor ID'},
+        {'name': '--model', 'type': non_empty_argument, 'help': 'Model ID'},
+        {'name': '--version', 'help': 'Device version'},
+        {'name': '--address', 'help': 'IP or web address for the device'},
+        {'name': '--description', 'help': 'Description'}])
+    def device_update(self, args):
+        keys = [c.name for c in Device.__mapper__.columns if c.name != 'id']
+        values = vars(args)
+        device = self.session.query(Device).get(args.id)
+        if not device:
+            raise ValueError('Device with id {} not found'.format(args.id))
+        for k in keys:
+            if k in values:
+                device[k] = values[k]
+        if self.session.dirty:
+            self.session.commit()
+            logger.info('Device %d updated', device.id)
+        else:
+            logger.info('No update to be performed for device %d', device.id)
+
+    @RegisterCommand('delete-device', 'Update information for an existing device', [
+        {'name': '--id', 'help': 'Device ID', 'type': int, 'required': True}])
+    def device_update(self, args):
+        keys = [c.name for c in Device.__mapper__.columns if c.name != 'id']
+        values = vars(args)
+        device = self.session.query(Device).get(args.id)
+        if not device:
+            raise ValueError('Device with id {} not found'.format(args.id))
+        self.session.delete(device)
+        self.session.commit()
+        logger.info('Device %d deleted', device.id)
 
 
 def homenet():
