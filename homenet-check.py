@@ -101,13 +101,14 @@ class HomeNetChecker():
 
     @RegisterCommand('query', 'Check for available device updates')
     def query(self, args):
-        # TODO: Determine notification scheme
+        # TODO: Determine notification scheme / output format
         devices = self.session.query(Device).order_by(Device.id)
         if devices:
             for device in devices:
-                logger.info('Checking for updates for %s %s', device.vendor_id, device.model)
-                if device.has_update():
-                    print(device.vendor_id, device.model)
+                logger.debug('Checking for updates for %s %s', device.vendor_id, device.model)
+                release = device.get_available_update()
+                if release is not None:
+                    print('Update available for {} {}: {}'.format(device.vendor_id, device.model, release.__dict__))
         else:
             logger.info('No devices configured')
 
@@ -154,8 +155,8 @@ class HomeNetChecker():
         if not device:
             raise ValueError('Device with id {} not found'.format(args.id))
         for k in keys:
-            if k in values:
-                device[k] = values[k]
+            if k in values and values[k] is not None:
+                setattr(device, k, values[k])
         if self.session.dirty:
             self.session.commit()
             logger.info('Device %d updated', device.id)

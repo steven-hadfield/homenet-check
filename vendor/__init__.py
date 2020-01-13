@@ -6,7 +6,7 @@ from os.path import dirname
 import pkgutil
 import sys
 
-__all__ = ['registry', 'Vendor', 'VendorRegistry']
+__all__ = ['registry', 'Release', 'Vendor', 'VendorRegistry']
 
 class Vendor(metaclass=abc.ABCMeta):
 
@@ -34,6 +34,16 @@ class Vendor(metaclass=abc.ABCMeta):
         """Use the device information to retrieve the current version. If not supported, should return None"""
         return None
 
+
+class Release:
+    version = None
+    download_url = None
+    notes = None
+    docs_url = None
+
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
 class VendorRegistry(object):
     config = None

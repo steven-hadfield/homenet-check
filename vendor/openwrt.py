@@ -38,8 +38,10 @@ class OpenWRT(Vendor):
             reader = csv.DictReader(csv_file, delimiter='\t')
             for row in reader:
                 if device.model == self._format_model(row):
-                    # Future functionality: pull firmwareopenwrtupgradeurl
-                    return row['supportedcurrentrel']
+                    version = row['supportedcurrentrel']
+                    docs_url = 'https://openwrt.org/releases/{}/notes-{}'.format('.'.join(version.split('.')[:2]), version)
+                    return Release(version=version, download_url=row['firmwareopenwrtupgradeurl'], docs_url=docs_url)
+        loggger.warning("Failed to find any released versions for %s", device.model)
         return None
 
 

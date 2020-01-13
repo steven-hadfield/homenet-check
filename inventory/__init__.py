@@ -31,10 +31,13 @@ class Device(Base):
 
     def get_available_update(self):
         vendor = self.get_vendor()
-        version = vendor.get_latest(self)
-        logger.info('Latest version for %s %s is %s, current: %s', vendor.name(), self.model, version, self.version)
-        if self.version is None or cmp_version(version, self.version) > 0:
-            return version
+        release = vendor.get_latest(self)
+        if release is None:
+            return None
+        logger.debug('Release information: %s', release.__dict__)
+        logger.debug('Latest version for %s %s is %s, current: %s', vendor.name(), self.model, release.version, self.version)
+        if self.version is None or cmp_version(release.version, self.version) > 0:
+            return release
 
     def has_update(self):
         newer = self.get_available_update()
