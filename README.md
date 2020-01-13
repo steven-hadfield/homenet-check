@@ -5,6 +5,15 @@ With many network-connected devices in your home from various vendors, how do yo
 
 The vision for this project is pretty flexible, but the goal is to help ensure your home network is kept (reasonably) secure. Security is a broad topic and so this can come in various forms. The initial goal is to setup a system that can check different vendor sites to notify you if there's an update available for a device on your network.
 
+## Supported vendors
+The list of vendors will grow in time as more people are able to contribute.
+
+The current list of implemented vendor checks
+| Vendor | ID | List Products | Check for Update |
+| -- | -- | -- | -- |
+| Netgear | `netgear` | :white_check_mark: | :heavy_check_mark: |
+| OpenWRT | `openwrt` | :heavy_check_mark: | :heavy_check_mark: |
+
 ## Potential future functionality
 
 Ideas of how the project could evolve in the future (likely through integration with other tools):
