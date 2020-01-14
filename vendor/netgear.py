@@ -38,12 +38,17 @@ class Netgear(Vendor):
                 logger.debug("Skipping non-release %s", title)
                 continue
             download_link = release.find("a", class_="btn")['href']
-            versions[version] = {'download': download_link, 'docs': link['href']}
+            file_size = None
+            size_match = re.search(r'File\ssize:\s([0-9.]+\s*[A-Za-z]+)', release.get_text())
+            if size_match:
+                file_size = size_match.group(1)
+            versions[version] = {'download': download_link, 'docs': link['href'], 'size': file_size}
         if not versions:
             logger.warning("Failed to find any released versions for %s", device.model)
             return None
         latest = sorted(list(versions.keys()), key=cmp_to_key(cmp_version), reverse=True)[0]
-        return Release(version=latest, download_url=versions[latest]['download'], docs_url=versions[latest]['docs'])
+        version = versions[latest]
+        return Release(version=latest, download_url=version['download'], docs_url=version['docs'], file_size=version['size'])
 
     def _normalize_release(self, title):
         match = re.search("Version ([0-9a-z.]+)", title)
@@ -76,7 +81,6 @@ class Netgear(Vendor):
         model_version = model_cell
         # Determine the position in the header to get the corresponding cell from the model row
         for cell in header.find_all('td'):
-            print('Header', cell, 'Cell', model_version)
             if cell == provider_cell:
                 break
             model_version = model_version.find_next_sibling('td')

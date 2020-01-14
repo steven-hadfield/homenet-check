@@ -40,6 +40,10 @@ class Release:
     download_url = None
     notes = None
     docs_url = None
+    hash_type = None
+    hash_sum = None
+    release_date = None
+    file_size = None
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
