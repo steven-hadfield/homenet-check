@@ -188,7 +188,10 @@ def homenet():
         log_config['filemode'] = 'a'
     logging.basicConfig(**log_config)
     checker = HomeNetChecker(config)
-    args.func(checker, args)
+    if 'func' in args:
+        args.func(checker, args)
+    else:
+        parser.print_help()
 
 if __name__ == '__main__':
     homenet()
